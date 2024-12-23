@@ -1,0 +1,36 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+.container-custom {
+    height: 100vh;
+}
+.col-left {
+    height: 100vh;
+    padding: 0;
+}
+.col-right {
+    height: 100vh;
+}
+.nav a {
+    color: #ebf2fa!important;
+}
+
+.nav a:hover {
+    color: lightskyblue!important;
+}
+
+.nav ul, .nav li {
+    width: 100%!important;
+}
+
+.active {
+    color: white;
+}
+
+.side_bar {
+    background-color: #6aaeb5;
+}

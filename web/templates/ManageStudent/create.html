@@ -1,0 +1,53 @@
+{% extends 'layout/base.html' %}
+{% block content %}
+<h1>Form tao hoc sinh</h1>
+<form class="row g-3 needs-validation" method="POST" novalidate>
+    <div class="col-md-6">
+        <label for="inputName" class="form-label">Họ và tên</label>
+        <input name="name" type="text" class="form-control" id="inputName" required>
+        <div class="valid-feedback">
+            Thêm Họ và têns
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Gioi tính</label>
+        <select name="gender" class="form-select" id="floatingSelect" aria-label="Floating label select example">
+            <option selected>Chọn giới tính</option>
+            <option value="1">Nam</option>
+            <option value="2">Nữ</option>
+        </select>
+    </div>
+
+    <div class="col-md-6">
+        <label for="inputDOB" class="form-label">Ngày sinh</label>
+        <input name="birth_date" type="date" class="form-control" id="inputDOB" required>
+        <div class="invalid-feedback">
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <label for="inputPhoneNumber" class="form-label">Số điện thoại </label>
+        <input name="phone" type="text" class="form-control" id="inputPhoneNumber" required>
+        <div class="invalid-feedback">
+            Vui lòng nhập Số điện thoại!
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <label for="inputEmail" class="form-label">Email</label>
+        <input name="email" type="email" class="form-control" id="inputEmail">
+    </div>
+
+    <div class="col-md-6">
+        <label for="inputAddress" class="form-label">Địa chỉ</label>
+        <input name="address" type="text" class="form-control" id="inputAddress" required>
+        <div class="invalid-feedback">
+        </div>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Thêm</button>
+    </div>
+</form>
+{% endblock %}
