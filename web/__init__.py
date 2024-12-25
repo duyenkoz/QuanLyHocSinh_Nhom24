@@ -7,7 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/qlhs?charset=utf8mb4" % quote('admin@123')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-app.config['PAGE_SIZE'] = 10
+app.config['PAGE_SIZE'] = 5
+app.config['MAX_STUDENT'] = 40
 app.secret_key = 'QuanLyHocSinhNhom24'
 
 login = LoginManager(app)

@@ -5,7 +5,7 @@
         <div class="table-title">
             <div class="row">
                 <div class="col-sm-6">
-                    <h2 href="/manage-student">TẠO MỚI <b>HỌC SINH</b></h2>
+                    <h2 href="/manage-student">SỬA THÔNG TIN <b>HỌC SINH</b></h2>
                 </div>
             </div>
         </div>
@@ -13,9 +13,11 @@
         <div class="form-responsive">
             <div class="form-container">
                 <form class="row g-3 needs-validation" method="POST" novalidate>
+                    <input name="id" value="{{student.id}}" hidden=""/>
                     <div class="col-md-6">
                         <label for="inputName" class="form-label">Họ và tên</label>
-                        <input name="name" type="text" class="form-control" id="inputName" required>
+                        <input name="name" type="text" class="form-control" id="inputName"
+                               value="{{student.name}}" required>
                         <div class="valid-feedback">
                             Thêm Họ và tên
                         </div>
@@ -23,23 +25,27 @@
 
                     <div class="col-md-6">
                         <label class="form-label">Giới tính</label>
-                        <select name="gender" class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                            <option selected>Chọn giới tính</option>
-                            <option value="MALE">Nam</option>
-                            <option value="FEMALE">Nữ</option>
+                        <select name="gender" class="form-select" id="floatingSelect"
+                                aria-label="Floating label select example">
+                            <option>Chọn giới tính</option>
+                            <option value="MALE" {% if student.gender.value=="Nam" %}selected{% endif %}>Nam</option>
+                            <option value="FEMALE" {% if student.gender.value=="Nữ" %}selected{% endif %}>Nữ</option>
+
                         </select>
                     </div>
 
                     <div class="col-md-6">
                         <label for="inputDOB" class="form-label">Ngày sinh</label>
-                        <input name="birth_date" type="date" class="form-control" id="inputDOB" required>
+                        <input name="birth_date" type="date" class="form-control" id="inputDOB"
+                               value="{{student.birth_date}}" required>
                         <div class="invalid-feedback">
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <label for="inputPhoneNumber" class="form-label">Số điện thoại</label>
-                        <input name="phone" type="text" class="form-control" id="inputPhoneNumber" required>
+                        <input name="phone" type="text" class="form-control" id="inputPhoneNumber"
+                               value="{{student.phone}}" required>
                         <div class="invalid-feedback">
                             Vui lòng nhập Số điện thoại!
                         </div>
@@ -47,21 +53,23 @@
 
                     <div class="col-md-6">
                         <label for="inputEmail" class="form-label">Email</label>
-                        <input name="email" type="email" class="form-control" id="inputEmail">
+                        <input name="email" type="email" class="form-control" id="inputEmail" value="{{student.email}}">
                     </div>
 
                     <div class="col-md-6">
                         <label for="inputAddress" class="form-label">Địa chỉ</label>
-                        <input name="address" type="text" class="form-control" id="inputAddress" required>
+                        <input name="address" type="text" class="form-control" id="inputAddress"
+                               value="{{student.address}}" required>
                         <div class="invalid-feedback">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Lớp</label>
-                        <select name="classId" class="form-select" id="classSelect" aria-label="Floating label select example">
+                        <select name="classId" class="form-select" id="classSelect"
+                                aria-label="Floating label select example">
                             <option selected>Chọn lớp</option>
                             {% for class in classes %}
-                            <option value="{{class.id}}">{{class.name}}</option>
+                            <option value="{{class.id}}" {% if student.class_id == class.id %}selected{% endif %}>{{class.name}}</option>
                             {% endfor %}
                         </select>
                     </div>
