@@ -1,0 +1,42 @@
+{% extends 'layout/base.html' %}
+{% block content %}
+    <div class="container mt-5">
+        <h1>Thêm môn học</h1>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="id" class="form-label">Mã môn học</label>
+                <input type="text" id="id" name="id" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Tên môn học</label>
+                <textarea id="name" name="name" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Thêm</button>
+        </form>
+         {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" id="flash-message">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <script>
+      // Tự động ẩn thông báo sau 5 giây
+      setTimeout(function() {
+        var flashMessage = document.getElementById('flash-message');
+        if (flashMessage) {
+          flashMessage.classList.remove('show');
+          flashMessage.classList.add('fade');
+        }
+      }, 3000); // 3000ms = 3 giây
+    </script>
+  {% endif %}
+{% endwith %}
+
+    </div>
+
+{% endblock %}

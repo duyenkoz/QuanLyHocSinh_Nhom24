@@ -1,25 +1,79 @@
-from web import app
+from web import app, db
 from web.models import Students, Users
 
 
 def load_user(user_id):
     return Users.query.get(user_id)
 
-#Function: Get list student with pagination
-def getStudents(pageIndex = 1, search = None):
-    students = Students.query
 
-    #Filter
+# Function: Get list student with pagination
+def getStudents(pageIndex=1, search=None):
+    query = Students.query
+
+    # Filter tìm kiếm
     if search:
-        students = students.filter(Students.name.contains(search))
+        query = query.filter(
+            Students.name.like(f"%{search}%") |  # Tìm theo tên
+            Students.email.like(f"%{search}%") |  # Tìm theo email
+            Students.phone.like(f"%{search}%")  # Tìm theo số điện thoại
+        )
 
-    #Pagination
+    # Lấy tổng số bản ghi (trước khi phân trang)
+    totalRecords = query.count()
+
+    # Pagination
     pageSize = app.config['PAGE_SIZE']
     skip = (pageIndex - 1) * pageSize
-    students = students.offset(skip).limit(pageSize)
+    students = query.offset(skip).limit(pageSize).all()
 
-    return students
+    return students, totalRecords
 
-#Function: Count list student
+# Function: Count list student
 def countStudents():
     return Students.query.count()
+
+# Function: Create new student
+def createStudent(new_student):
+    try:
+        db.session.add(new_student)
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return False
+
+# Function: Edit student
+def editStudent(user_id, edit_student):
+    try:
+        #Get student info
+        student = Students.query.get(user_id)
+        #Update info
+        student.name = edit_student.name
+        student.email = edit_student.email
+        student.phone = edit_student.phone
+        student.gender = edit_student.gender
+        student.birth_date = edit_student.birth_date
+        student.address = edit_student.address
+
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return False
+
+# Function: Delete student
+def deleteStudent(student_id):
+    try:
+        Students.query.filter_by(id=student_id).delete()
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return False
+
+# Function: Get student by id
+def getStudentById (student_id):
+    return Students.query.get(student_id)
+
+
+
