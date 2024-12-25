@@ -1,0 +1,43 @@
+{% extends 'layout/base.html' %}
+{% block content %}
+<div class="">
+    <div class="table-wrapper">
+        <div class="table-title">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2 href="/manage-student">TẠO MỚI <b>LỚP</b></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-responsive">
+            <div class="form-container">
+                <form class="row g-3 needs-validation" method="POST" novalidate>
+                    <div class="col-md-6">
+                        <label for="inputName" class="form-label">Tên lớp</label>
+                        <input name="name" type="text" class="form-control" id="inputName" required>
+                        <div class="valid-feedback">
+                            Thêm Họ và tên
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Khối</label>
+                        <select name="grade" class="form-select" id="floatingSelect" aria-label="Floating label select example">
+                            <option selected>Chọn khối</option>
+                            <option value="10">Khối 10</option>
+                            <option value="11">Khối 11</option>
+                            <option value="12">Khối 12</option>
+                        </select>
+                    </div>
+
+                    <!-- Thêm nút gửi form -->
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Tạo mới</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

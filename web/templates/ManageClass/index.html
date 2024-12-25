@@ -1,0 +1,108 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="">
+     {% if request.args.get('message') and request.args.get('statuscode') %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast align-items-center
+                {% if request.args.get('statuscode') == '1' %} text-bg-success
+                {% elif request.args.get('statuscode') == '2' %} text-bg-danger
+                {% endif %} border-0"
+             role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 999">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ request.args.get('message') }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const toastEl = document.querySelector('.toast');
+          const toast = new bootstrap.Toast(toastEl);
+          toast.show(); // Hiển thị Toast
+      });
+    </script>
+    {% endif %}
+    <div class="table-wrapper">
+        <div class="table-title">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2 href="/manage-student">DANH SÁCH <b>LỚP</b></h2>
+                </div>
+                <div class="col-sm-6 d-flex justify-content-end align-items-center">
+                    <a href="/manage-class/create"
+                       class="btn btn-success btn-sm me-3 d-inline-flex align-items-center">
+                        <i class="fa-solid fa-plus"></i><span> Thêm</span>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <div class="table-container">
+                {% if totalRecords > 0 %}
+                <table class="table table-striped table-hover">
+                    <thead class="table-danger table-thead">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên lớp</th>
+                        <th>Khối</th>
+                        <th>Sĩ số</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for class in classes %}
+                    <tr>
+                        <td name="idclass">{{ class.id }}</td>
+                        <td>{{ class.name }}</td>
+                        <td>{{ class.grade }}</td>
+                        <td>{{ class.numberStudent }}</td>
+                        <td>
+                            <a href="/manage-class/students?classId={{class.id}}" class="edit" data-toggle="modal">
+                                <i class="fa-solid fa-eye" data-toggle="tooltip" title="Chi tiết"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+            <div class="pagination">
+                <nav aria-label="Pagination">
+                    <ul class="pagination justify-content-center">
+                        <!-- Nút "Trang trước" -->
+                        <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                            <a class="page-link" href="?pageIndex={{ currentPage - 1 }}&search={{ search }}"
+                               tabindex="-1">Previous</a>
+                        </li>
+
+                        <!-- Danh sách các trang -->
+                        {% for page in pagination %}
+                        {% if page == '...' %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item {% if page == currentPage %}active{% endif %}">
+                            <a class="page-link" href="?pageIndex={{ page }}&search={{ search }}">{{ page }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        <!-- Nút "Trang sau" -->
+                        <li class="page-item {% if currentPage == totalPage %}disabled{% endif %}">
+                            <a class="page-link" href="?pageIndex={{ currentPage + 1 }}&search={{ search }}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
