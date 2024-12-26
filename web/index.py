@@ -1,13 +1,12 @@
 import math
-from re import search
 
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import current_user, login_user, logout_user
 from web import app, db
 import services.authservice
 from web.extentions.pagination import calcPagination
-from web.models import Students, GenderEnum, Classes, Course
-from web.services import studentservice, classservice
+from web.models import Students, GenderEnum
+from web.services import studentservice
 
 
 @app.before_request
@@ -46,26 +45,18 @@ def logout():
 @app.route('/manage-student')
 def manage_student():
     pageIndex = request.args.get('pageIndex', 1, type=int)
-    search = request.args.get('search', '').strip()
-
-    # Lấy danh sách học sinh và tổng số bản ghi từ service
-    students, totalRecords = studentservice.getStudents(pageIndex, search)
-
-    # Tính tổng số trang
+    search = request.args.get('search')
+    students = studentservice.getStudents(pageIndex, search)
+    totalRecords = studentservice.countStudents()
     totalPage = math.ceil(totalRecords / app.config['PAGE_SIZE'])
 
-    # Tạo pagination
     pagination = calcPagination(pageIndex, totalPage)
+    return render_template('ManageStudent/index.html'
+                           , students = students
+                           , totalPage = totalPage
+                           , currentPage = pageIndex
+                           , pagination = pagination)
 
-    return render_template(
-        'ManageStudent/index.html',
-        students=students,
-        totalPage=totalPage,
-        currentPage=pageIndex,
-        pagination=pagination,
-        search=search,  # Gửi từ khóa tìm kiếm hiện tại để hiển thị
-        totalRecords=totalRecords  # Tổng số kết quả để xử lý hiển thị thông báo
-    )
 
 @app.route('/manage-student/create', methods=['GET', 'POST'])
 def manage_student_create():
@@ -77,205 +68,29 @@ def manage_student_create():
         phone = request.form.get('phone')
         email = request.form.get('email')
         address = request.form.get('address')
-        class_id = request.form.get('class_id')
+
+        # Kiểm tra giới tính để gán giá trị cho Gender Enum
+        gender_enum = GenderEnum.FEMALE if gender == 'Nữ' else GenderEnum.MALE
+
         # Tạo đối tượng Student mới
         new_student = Students(
             name=name,
-            gender=gender,
-            birth_date=birth_date,
-            phone=phone,
-            email=email,
-            address=address,
-        )
-        if class_id is None:
-            new_student.class_id = classservice.autoAssign(new_student)
-        new_student.class_id = class_id
-        result = studentservice.createStudent(new_student)
-
-        if result:
-            return redirect(url_for('manage_student', message='Thêm thành công', statuscode=1))
-        else:
-            return redirect(url_for('manage_student', message='Thêm không thành công', statuscode=2))
-
-    #Method: GET
-    classes = classservice.getAllClasses()
-
-    return render_template('ManageStudent/create.html', classes=classes)
-
-@app.route('/manage-student/edit', methods=['GET', 'POST'])
-def manage_student_edit():
-    if request.method.__eq__('POST'):
-        id = request.form.get('id')
-        name = request.form.get('name')
-        gender = request.form.get('gender')
-        birth_date = request.form.get('birth_date')
-        phone = request.form.get('phone')
-        email = request.form.get('email')
-        address = request.form.get('address')
-
-        edit_student = Students(
-            name=name,
-            gender=gender,
+            gender=gender_enum,
             birth_date=birth_date,
             phone=phone,
             email=email,
             address=address
         )
-        result = studentservice.editStudent(id, edit_student)
 
-        if result:
-            return redirect(url_for('manage_student', message='Chỉnh sửa thành công', statuscode=1))
-        else:
-            return redirect(url_for('manage_student', message='Chỉnh sửa không thành công', statuscode=2))
-
-    id = request.args.get('id')
-    student = studentservice.getStudentById(id)
-    classes = classservice.getAllClasses()
-    return render_template('ManageStudent/edit.html', student=student, classes=classes)
-
-@app.route('/manage-student/delete')
-def manage_student_delete():
-    studentId = request.args.get('id')
-    result = studentservice.deleteStudent(studentId)
-    if result:
-        return redirect(url_for('manage_student', message = 'Xóa thành công', statuscode = 1))
-    else:
-        return redirect(url_for('manage_student', message = 'Xóa không thành công', statuscode = 2))
-
-@app.route('/manage-class')
-def manage_class():
-    pageIndex = request.args.get('pageIndex', 1, type=int)
-
-    # Lấy danh sách học sinh và tổng số bản ghi từ service
-    classes, totalRecords = classservice.getClasses(pageIndex)
-
-    # Tính tổng số trang
-    totalPage = math.ceil(totalRecords / app.config['PAGE_SIZE'])
-
-    # Tạo pagination
-    pagination = calcPagination(pageIndex, totalPage)
-
-    return render_template(
-        'ManageClass/index.html',
-        classes=classes,
-        totalPage=totalPage,
-        currentPage=pageIndex,
-        pagination=pagination,
-        totalRecords=totalRecords  # Tổng số kết quả để xử lý hiển thị thông báo
-    )
-
-@app.route('/manage-class/create', methods=['GET', 'POST'])
-def manage_class_create():
-    if request.method.__eq__('POST'):
-        # Lấy dữ liệu từ form
-        name = request.form.get('name')
-        grade = request.form.get('grade')
-
-        # Tạo đối tượng Student mới
-        new_class = Classes(
-            name=name,
-            grade=grade,
-
-        )
-        result = classservice.createClass(new_class)
-
-        if result:
-            return redirect(url_for('manage_class', message='Thêm thành công', statuscode=1))
-        else:
-            return redirect(url_for('manage_class', message='Thêm không thành công', statuscode=2))
-
-    return render_template('ManageClass/create.html')
-
-@app.route('/manage-class/students')
-def manage_class_students():
-    pageIndex = request.args.get('pageIndex', 1, type=int)
-    classId = request.args.get('classId')
-    search = request.args.get('search', None, type=str)
-    # Lấy danh sách học sinh và tổng số bản ghi từ service
-    students, totalRecords = classservice.getStudentsByClassId(classId, pageIndex, search)
-
-    classInfo = classservice.getClassById(classId)
-    # Tính tổng số trang
-    totalPage = math.ceil(totalRecords / app.config['PAGE_SIZE'])
-
-    # Tạo pagination
-    pagination = calcPagination(pageIndex, totalPage)
-
-    return render_template(
-        'ManageClass/listStudent.html',
-        classInfo=classInfo,
-        students=students,
-        totalPage=totalPage,
-        currentPage=pageIndex,
-        pagination=pagination,
-        pageSize=app.config['PAGE_SIZE'],
-        totalRecords=totalRecords  # Tổng số kết quả để xử lý hiển thị thông báo
-    )
-
-@app.route('/update_course', methods=['GET', 'POST'])
-def update_course():
-    # Lấy danh sách môn học từ cơ sở dữ liệu
-    courses = Course.query.all()
-
-    if request.method == 'POST':
-        course_id = request.form.get('course_id')  # Lấy ID môn học từ form
-        id = request.form.get('id')  # Lấy Mã môn học từ form
-        name = request.form.get('name')  # Lấy Tên môn học từ form
-
-        # Tìm môn học cần cập nhật
-        course = Course.query.get(course_id)  # Tìm môn học bằng ID
-        if course:
-            course.id = id  # Cập nhật Mã môn học
-            course.name = name  # Cập nhật Tên môn học
-
-            db.session.commit()  # Lưu thay đổi vào cơ sở dữ liệu
-            flash('Cập nhật môn học thành công!', 'success')  # Thông báo thành công
-        else:
-            flash('Không tìm thấy môn học!', 'danger')  # Thông báo nếu không tìm thấy môn học
-
-        return redirect('/manage_course')  # Quay lại trang quản lý môn học
-
-    return render_template('ManageCourse/update_course.html', courses=courses)  # Trả về template
-#them mon hoc
-@app.route('/add_course', methods=['GET', 'POST'])
-def add_course():
-    if request.method == 'POST':
-        id = request.form.get('id')
-        name = request.form.get('name')
-
-        # Thêm môn học vào cơ sở dữ liệu
-        new_course = Course(id=id, name=name)
-        db.session.add(new_course)
+        # Thêm vào database
+        db.session.add(new_student)
         db.session.commit()
 
-        flash('Thêm môn học thành công!', 'success')
-        return redirect(url_for('add_course'))
+        # Sau khi thêm xong, redirect về trang danh sách học sinh
+        flash('Học sinh đã được thêm thành công!', 'success')
+        return redirect(url_for('manage_student'))
 
-    return render_template('ManageCourse/add_course.html')
-
-# hiển thị danh sách môn học và tìm kiếm
-@app.route('/manage_course', methods=['GET'])
-def manage_courses():
-    keyword = request.args.get('keyword', '').strip()  # Lấy từ khóa tìm kiếm từ URL, loại bỏ khoảng trắng thừa
-    if keyword:
-        courses = Course.query.filter(Course.name.contains(keyword)).all()
-        print(f"Debug: Courses found: {courses}")  # Kiểm tra kết quả truy vấn
-        if not courses:
-            flash(f"Không tìm thấy môn học nào với từ khóa: '{keyword}'", 'warning')
-    else:
-        courses = Course.query.all()
-    return render_template('ManageCourse/manage_course.html', courses=courses)
-@app.route('/delete_course/<string:course_id>', methods=['POST'])
-def delete_course(course_id):
-    course = Course.query.get(course_id)
-    if course:
-        db.session.delete(course)
-        db.session.commit()
-        flash(f'Đã xóa môn học "{course.name}" thành công!', 'success')
-    if not course:
-            flash(f"Không tìm thấy môn học nào với từ khóa: '{keyword}'", 'warning')
-            print(f"Debug: Flash message sent: Không tìm thấy môn học nào với từ khóa: '{keyword}'")
-    return redirect(url_for('manage_courses') )# xem lại
+    return render_template('ManageStudent/create.html')
 
 
 if __name__ == '__main__':
