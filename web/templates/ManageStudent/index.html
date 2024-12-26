@@ -1,5 +1,5 @@
 {% extends 'layout/base.html' %}
-
+{% block title %}Quản lý học sinh{% endblock %}
 {% block content %}
 <div class="">
     {% if request.args.get('message') and request.args.get('statuscode') %}
@@ -20,10 +20,10 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-          const toastEl = document.querySelector('.toast');
-          const toast = new bootstrap.Toast(toastEl);
-          toast.show(); // Hiển thị Toast
-      });
+            const toastEl = document.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show(); // Hiển thị Toast
+        });
     </script>
     {% endif %}
     <div class="table-wrapper">
@@ -58,6 +58,12 @@
         {% elif search and totalRecords == 0 %}
         <div class="alert alert-warning" role="alert">
             Không tìm thấy kết quả nào phù hợp với từ khóa "{{ search }}".
+        </div>
+        {% endif %}
+
+        {% if students|length == 0 %}
+        <div class="alert alert-danger" role="alert">
+            Không có dữ liệu học sinh!
         </div>
         {% endif %}
 
@@ -103,12 +109,13 @@
                 {% endif %}
             </div>
             <div class="pagination">
+                {% if students|length > 0 %}
                 <nav aria-label="Pagination">
                     <ul class="pagination justify-content-center">
                         <!-- Nút "Trang trước" -->
                         <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
                             <a class="page-link" href="?pageIndex={{ currentPage - 1 }}&search={{ search }}"
-                               tabindex="-1">Previous</a>
+                               tabindex="-1">Trước</a>
                         </li>
 
                         <!-- Danh sách các trang -->
@@ -126,53 +133,13 @@
 
                         <!-- Nút "Trang sau" -->
                         <li class="page-item {% if currentPage == totalPage %}disabled{% endif %}">
-                            <a class="page-link" href="?pageIndex={{ currentPage + 1 }}&search={{ search }}">Next</a>
+                            <a class="page-link" href="?pageIndex={{ currentPage + 1 }}&search={{ search }}">Sau</a>
                         </li>
                     </ul>
                 </nav>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-
-
-<!--<div class="d-flex align-items-center justify-content-between mb-3">-->
-<!--    &lt;!&ndash; Form tìm kiếm &ndash;&gt;-->
-
-
-<!--    &lt;!&ndash; Button tạo mới &ndash;&gt;-->
-<!--    <div>-->
-<!--        <a class="btn btn-success me-2" href="/manage-student/create"><i class="fa-solid fa-plus"></i> Tạo mới</a>-->
-<!--        <a class="btn btn-primary" href=""><i class="fa-solid fa-print"></i> Xuất Excel</a>-->
-<!--    </div>-->
-<!--</div>-->
-<!--&lt;!&ndash;</form>&ndash;&gt;-->
-<!--<div class="mt-5">-->
-<!--    <table class="table table-striped">-->
-<!--        <thead class="table-danger">-->
-<!--        <tr>-->
-<!--            <th>ID</th>-->
-<!--            <th>Tên</th>-->
-<!--            <th>Giới tính</th>-->
-<!--            <th>Ngày sinh</th>-->
-<!--            <th>Địa chỉ</th>-->
-<!--            <th>Số điện thoại</th>-->
-<!--            <th>Email</th>-->
-<!--        </tr>-->
-<!--        </thead>-->
-<!--        <tbody>-->
-<!--        {% for student in students %}-->
-<!--        <tr>-->
-<!--            <td>{{ student.id }}</td>-->
-<!--            <td>{{ student.name }}</td>-->
-<!--            <td>{{ student.gender }}</td>-->
-<!--            <td>{{ student.birth_date }}</td>-->
-<!--            <td>{{ student.address }}</td>-->
-<!--            <td>{{ student.phone }}</td>-->
-<!--            <td>{{ student.email }}</td>-->
-<!--        </tr>-->
-<!--        {% endfor %}-->
-<!--        </tbody>-->
-<!--    </table>-->
-<!--</div>-->

@@ -1,5 +1,5 @@
 {% extends 'layout/base.html' %}
-{% block title %}Danh sách lớp{% endblock %}
+{% block title %}Thêm học sinh vào lớp{% endblock %}
 {% block content %}
 <div class="">
     {% if request.args.get('message') and request.args.get('statuscode') %}
@@ -30,51 +30,49 @@
         <div class="table-title">
             <div class="row">
                 <div class="col-sm-6">
-                    <h2 href="/manage-student">DANH SÁCH <b>LỚP</b></h2>
+                    <h2>THÊM HỌC SINH VÀO <b>LỚP {{ classInfo.name}}</b>
+                    </h2>
                 </div>
                 <div class="col-sm-6 d-flex justify-content-end align-items-center">
-                    <a href="/manage-class/create"
-                       class="btn btn-success btn-sm me-3 d-inline-flex align-items-center">
-                        <i class="fa-solid fa-plus"></i><span> Thêm</span>
-                    </a>
-                    <form action="/manage-class" id="searchForm" method="GET" class="d-inline-flex align-items-center">
-                        <div style="width: 300px;">
-                            <select name="grade" class="form-select" id="gradeSelect"
-                                    aria-label="Floating label select example">
-                                <option value="" selected>Chọn khối</option>
-                                <option value="10" {% if selectedgrade=='10' %}selected{% endif %}>Khối 10</option>
-                                <option value="11" {% if selectedgrade=='11' %}selected{% endif %}>Khối 11</option>
-                                <option value="12" {% if selectedgrade=='12' %}selected{% endif %}>Khối 12</option>
-                            </select>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
 
+        {% if search and totalRecords > 0 %}
+        <div class="alert alert-info" role="alert">
+            Có {{ totalRecords }} kết quả tìm thấy.
+        </div>
+        {% elif search and totalRecords == 0 %}
+        <div class="alert alert-warning" role="alert">
+            Không tìm thấy kết quả nào phù hợp với từ khóa "{{ search }}".
+        </div>
+        {% endif %}
         <div class="table-responsive">
             <div class="table-container">
                 {% if totalRecords > 0 %}
                 <table class="table table-striped table-hover">
                     <thead class="table-danger table-thead">
                     <tr>
-                        <th>ID</th>
-                        <th>Tên lớp</th>
-                        <th>Khối</th>
-                        <th>Sĩ số</th>
+                        <th>STT</th>
+                        <th>Họ tên</th>
+                        <th>Giới tính</th>
+                        <th>Năm sinh</th>
+                        <th>Địa chỉ</th>
                         <th></th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for class in classes %}
+                    {% for student in students %}
                     <tr>
-                        <td name="idclass">{{ class.id }}</td>
-                        <td>{{ class.name }}</td>
-                        <td>{{ class.grade }}</td>
-                        <td>{{ class.numberStudent }}</td>
+                        <td>{{ (currentPage - 1) * pageSize + loop.index }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.gender.value }}</td>
+                        <td>{{ student.birth_date.strftime('%Y') }}</td>
+                        <td class="nowrap">{{ student.address}}</td>
                         <td>
-                            <a href="/manage-class/students?classId={{class.id}}" class="edit" data-toggle="modal">
-                                <i class="fa-solid fa-eye" data-toggle="tooltip" title="Chi tiết"></i>
+                            <a href="/manage-class/students/add?studentId={{student.id}}&classId={{classInfo.id}}" class="add" data-toggle="modal"
+                               data-id="{{ student.id }} ">
+                                <i class="fa-solid fa-plus" data-toggle="tooltip" title="Add"></i>
                             </a>
                         </td>
                     </tr>
@@ -88,8 +86,10 @@
                     <ul class="pagination justify-content-center">
                         <!-- Nút "Trang trước" -->
                         <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
-                            <a class="page-link" href="?pageIndex={{ currentPage - 1 }}&search={{ search }}"
-                               tabindex="-1">Trước</a>
+                            <a class="page-link" href="?pageIndex={{ currentPage - 1 }}&classId={{ classInfo.id}}"
+                               tabindex="-1">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
                         </li>
 
                         <!-- Danh sách các trang -->
@@ -100,14 +100,18 @@
                         </li>
                         {% else %}
                         <li class="page-item {% if page == currentPage %}active{% endif %}">
-                            <a class="page-link" href="?pageIndex={{ page }}&search={{ search }}">{{ page }}</a>
+                            <a class="page-link"
+                               href="?pageIndex={{ page }}&search={{ search }}&classId={{ classInfo.id}}">{{ page }}</a>
                         </li>
                         {% endif %}
                         {% endfor %}
 
                         <!-- Nút "Trang sau" -->
                         <li class="page-item {% if currentPage == totalPage %}disabled{% endif %}">
-                            <a class="page-link" href="?pageIndex={{ currentPage + 1 }}&search={{ search }}">Sau</a>
+                            <a class="page-link"
+                               href="?pageIndex={{ currentPage + 1 }}&search={{ search }}&classId={{ classInfo.id}}">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
                         </li>
                     </ul>
                 </nav>
@@ -115,12 +119,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    let gradeElement = document.getElementById("gradeSelect");
-    gradeElement.addEventListener("change", function(){
-        let form = document.getElementById("searchForm");
-        form.submit();
-    })
-</script>
 {% endblock %}

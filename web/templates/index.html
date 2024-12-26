@@ -1,4 +1,126 @@
 {% extends 'layout/base.html' %}
+{% block title %}Dashboard{% endblock %}
+<link rel="stylesheet" href="../static/css/home.css">
+
 {% block content %}
-<h1>xin chao</h1>
+<div class="container-fluid">
+    <h2 class="mt-2"><b>👋 Hello, </b>{{ current_user.username }}</h2>
+    <!-- Card stats -->
+    <div class="row g-6 mb-6">
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card shadow border-info border-2">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <span class="h6 font-semibold text-muted text-sm d-block mb-2">Số học sinh</span>
+                            <span class="h3 font-bold mb-0">{{ total_students }}</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-primary text-white rounded-circle"
+                                 style="width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1rem;">
+                                <i class="fa-solid fa-user-group"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card shadow border-success border-2">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <span class="h6 font-semibold text-muted text-sm d-block mb-2">Số lớp học</span>
+                            <span class="h3 font-bold mb-0">{{ total_classes }}</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-success text-white rounded-circle"
+                                 style="width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1rem;">
+                                <i class="fa-solid fa-school"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card shadow border-warning border-2">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <span class="h6 font-semibold text-muted text-sm d-block mb-2">HS chưa có lớp</span>
+                            <span class="h3 font-bold mb-0">{{ students_without_class }}</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-warning text-white rounded-circle"
+                                 style="width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1rem;">
+                                <i class="fa-solid fa-school-circle-exclamation"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card shadow border-danger border-2">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <span class="h7 font-semibold text-muted text-sm d-block mb-2">Lớp chưa có HS</span>
+                            <span class="h3 font-bold mb-0">{{ classes_without_students }}</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-danger text-white rounded-circle"
+                                 style="width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1rem;">
+                                <i class="fa-solid fa-user-large-slash"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="card">
+            <canvas id="classChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Nhận dữ liệu từ Flask (chart_data là một mảng chứa tuples)
+    const chartData = {{ chart_data | tojson }};
+    console.log(chartData);
+    // Tách labels và values từ chartData
+    const labels = chartData.map(item => item[0]);  // Tên lớp
+    const values = chartData.map(item => item[1]);  // Số lượng học sinh
+
+    const ctx = document.getElementById('classChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Số lượng học sinh',
+                data: values,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 40,
+                    ticks: {
+                        stepSize: 4
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

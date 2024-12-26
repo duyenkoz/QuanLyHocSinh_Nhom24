@@ -30,7 +30,12 @@ def getStudents(pageIndex=1, search=None):
 
 # Function: Count list student
 def countStudents():
-    return Students.query.count()
+    total_students = Students.query.count()
+    return total_students
+
+# Function: Count student not in class
+def countStudentNotInClass():
+    return Students.query.filter(Students.class_id.is_(None)).count()
 
 # Function: Create new student
 def createStudent(new_student):
@@ -43,10 +48,10 @@ def createStudent(new_student):
         return False
 
 # Function: Edit student
-def editStudent(user_id, edit_student):
+def editStudent(student_id, edit_student):
     try:
         #Get student info
-        student = Students.query.get(user_id)
+        student = Students.query.get(student_id)
         #Update info
         student.name = edit_student.name
         student.email = edit_student.email
@@ -54,6 +59,7 @@ def editStudent(user_id, edit_student):
         student.gender = edit_student.gender
         student.birth_date = edit_student.birth_date
         student.address = edit_student.address
+        student.class_id = edit_student.class_id
 
         db.session.commit()
         return True
@@ -74,6 +80,22 @@ def deleteStudent(student_id):
 # Function: Get student by id
 def getStudentById (student_id):
     return Students.query.get(student_id)
+
+# Function: Get student not in class
+def getStudentsNotInClass(pageIndex=1):
+    query = Students.query.filter(Students.class_id.is_(None))
+
+    # Lấy tổng số bản ghi (trước khi phân trang)
+    totalRecords = query.count()
+
+    # Pagination
+    pageSize = app.config['PAGE_SIZE']
+    skip = (pageIndex - 1) * pageSize
+    students = query.offset(skip).limit(pageSize).all()
+
+    return students, totalRecords
+
+
 
 
 

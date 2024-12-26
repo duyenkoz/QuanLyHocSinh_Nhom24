@@ -7,11 +7,12 @@
                 </a>
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
                     <li class="nav-item">
-                        <a href="#" class="nav-link align-middle px-0">
-                            <i class="fa-solid fa-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                        <a href="/" class="nav-link align-middle px-0">
+                            <i class="fa-solid fa-house"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span>
                         </a>
                     </li>
                     <li>
+                        {%if current_user.user_role == UserRole.USER %}
                         <a href="#manage_list" data-bs-toggle="collapse" class="nav-link px-0 align-middle">
                             <i class="fa-regular fa-rectangle-list"></i> <span class="ms-1 d-none d-sm-inline">Quản lý</span> </a>
                         <ul class="collapse show nav flex-column ms-1" id="manage_list" data-bs-parent="#menu">
@@ -21,8 +22,12 @@
                             <li>
                                 <a href="/manage-class" class="nav-link px-0"> <span class="d-none d-sm-inline">Lớp</span></a>
                             </li>
-                             <a href="#manage_list" data-bs-toggle="collapse" class="nav-link px-0 align-middle">
+                        </ul>
+                        {% endif %}
+                        {%if current_user.user_role == UserRole.ADMIN %}
+                        <a href="#manage_subject" data-bs-toggle="collapse" class="nav-link px-0 align-middle">
                             <i class="fa-regular fa-rectangle-list"></i> <span class="ms-1 d-none d-sm-inline">Quản lý môn học</span> </a>
+                        <ul class="collapse show nav flex-column ms-1" id="manage_subject" data-bs-parent="#menu">
                             <li>
                                 <a href="/add_course" class="nav-link px-0"> <span class="d-none d-sm-inline">Thêm môn học</span></a>
                             </li>
@@ -30,6 +35,7 @@
                                 <a href="/manage_courses" class="nav-link px-0"> <span class="d-none d-sm-inline">Cập nhật môn học</span></a>
                             </li>
                         </ul>
+                        {% endif %}
                     </li>
                 </ul>
                 <hr>

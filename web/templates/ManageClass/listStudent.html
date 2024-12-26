@@ -1,5 +1,5 @@
 {% extends 'layout/base.html' %}
-
+{% block title %}Danh sách học sinh của lớp{% endblock %}
 {% block content %}
 <div class="">
     {% if request.args.get('message') and request.args.get('statuscode') %}
@@ -22,7 +22,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const toastEl = document.querySelector('.toast');
             const toast = new bootstrap.Toast(toastEl);
-            toast.show(); // Hiển thị Toast
+            toast.show();
         });
     </script>
     {% endif %}
@@ -30,12 +30,13 @@
         <div class="table-title">
             <div class="row">
                 <div class="col-sm-6">
-                    <h2>DANH SÁCH HỌC SINH <b>LỚP {{ classInfo.name}}</b> - SĨ SỐ <b> {{ classInfo.numberStudent}}</b></h2>
+                    <h2>DANH SÁCH HỌC SINH <b>LỚP {{ classInfo.name}}</b> - SĨ SỐ <b> {{ classInfo.numberStudent}}</b>
+                    </h2>
                 </div>
                 <div class="col-sm-6 d-flex justify-content-end align-items-center">
-                    <a href="/manage-class/create"
+                    <a href="/manage-class/students/list?classId={{ classInfo.id}}"
                        class="btn btn-success btn-sm me-3 d-inline-flex align-items-center">
-                        <i class="fa-solid fa-plus"></i><span> Thêm</span>
+                        <i class="fa-solid fa-plus"></i><span> Thêm hs</span>
                     </a>
                     <form action="/manage-class/students?classId={{ classInfo.id}}" method="GET" class="d-inline-flex">
                         <div class="input-group" style="width: 300px;">
@@ -61,6 +62,13 @@
             Không tìm thấy kết quả nào phù hợp với từ khóa "{{ search }}".
         </div>
         {% endif %}
+
+        {% if students|length == 0 %}
+        <div class="alert alert-danger" role="alert">
+            Không có học sinh thuộc lớp!
+        </div>
+        {% endif %}
+
         <div class="table-responsive">
             <div class="table-container">
                 {% if totalRecords > 0 %}
@@ -72,6 +80,7 @@
                         <th>Giới tính</th>
                         <th>Năm sinh</th>
                         <th>Địa chỉ</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -82,6 +91,13 @@
                         <td>{{ student.gender.value }}</td>
                         <td>{{ student.birth_date.strftime('%Y') }}</td>
                         <td class="nowrap">{{ student.address}}</td>
+                        <td>
+                            <a href="/manage-class/students/delete?studentId={{student.id}}&classId={{classInfo.id}}"
+                               class="delete" data-toggle="modal"
+                               data-id="{{ student.id }} ">
+                                <i class="fa-solid fa-trash" data-toggle="tooltip" title="Delete"></i>
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -89,6 +105,7 @@
                 {% endif %}
             </div>
             <div class="pagination">
+                {% if students|length > 0 %}
                 <nav aria-label="Pagination">
                     <ul class="pagination justify-content-center">
                         <!-- Nút "Trang trước" -->
@@ -122,6 +139,7 @@
                         </li>
                     </ul>
                 </nav>
+                {% endif %}
             </div>
         </div>
     </div>

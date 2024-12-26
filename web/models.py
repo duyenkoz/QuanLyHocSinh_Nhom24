@@ -40,7 +40,7 @@ class GenderEnum(enum.Enum):
 # Tạo bảng lớp
 class Classes(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False, unique=True)
     grade = db.Column(db.Integer, nullable=False)
     max_students = db.Column(db.Integer, default=app.config['MAX_STUDENT'])
     students = relationship("Students", backref="class")
@@ -88,113 +88,17 @@ def seed_data():
 
 
 
-    # if not Classes.query.first():
-    #     classes = [
-    #         Classes(name="10A1"),
-    #         Classes(name="10A2"),
-    #         Classes(name="11A1"),
-    #         Classes(name="12A1"),
-    #     ]
-    #     db.session.add_all(classes)
-    #     db.session.commit()
+    if not Classes.query.first():
+        classes = [
+            Classes(name="10A1", grade=10),
+            Classes(name="11A1", grade=11),
+            Classes(name="12A1", grade=12),
+        ]
+        db.session.add_all(classes)
+        db.session.commit()
 
-    # if not Students.query.first():
-    #     students = [
-    #         Students(
-    #             name="Nguyễn Văn A",
-    #             gender=GenderEnum.MALE,  # Sử dụng GenderEnum.MALE thay vì Gender.Nam
-    #             birth_date="2001-01-15",
-    #             address="123 Đường Lý Thường Kiệt, TP.HCM",
-    #             phone="0912345678",
-    #             email="vana@gmail.com",
-    #             class_id=1
-    #         ),
-    #         Students(
-    #             name="Trần Thị B",
-    #             gender=GenderEnum.FEMALE,  # Sử dụng GenderEnum.FEMALE thay vì Gender.Nữ
-    #             birth_date="2001-03-22",
-    #             address="456 Đường Nguyễn Văn Linh, TP.HCM",
-    #             phone="0987654321",
-    #             email="thib@gmail.com",
-    #             class_id=1
-    #         ),
-    #         Students(
-    #             name="Lê Văn C",
-    #             gender=GenderEnum.MALE,
-    #             birth_date="2000-07-09",
-    #             address="789 Đường Hai Bà Trưng, Hà Nội",
-    #             phone="0934567890",
-    #             email="vanc@gmail.com",
-    #             class_id=2
-    #         ),
-    #         Students(
-    #             name="Phạm Thị D",
-    #             gender=GenderEnum.FEMALE,
-    #             birth_date="2002-05-12",
-    #             address="101 Đường Lê Lợi, Đà Nẵng",
-    #             phone="0923456789",
-    #             email="thid@gmail.com",
-    #             class_id=1
-    #         ),
-    #         Students(
-    #             name="Hoàng Văn E",
-    #             gender=GenderEnum.MALE,
-    #             birth_date="2001-11-20",
-    #             address="202 Đường Võ Nguyên Giáp, Cần Thơ",
-    #             phone="0911223344",
-    #             email="vane@gmail.com",
-    #             class_id=2
-    #         ),
-    #         Students(
-    #             name="Nguyễn Thị F",
-    #             gender=GenderEnum.FEMALE,
-    #             birth_date="2002-09-30",
-    #             address="303 Đường Nguyễn Huệ, TP.HCM",
-    #             phone="0945678901",
-    #             email="thif@gmail.com",
-    #             class_id=1
-    #         ),
-    #         Students(
-    #             name="Trần Văn G",
-    #             gender=GenderEnum.MALE,
-    #             birth_date="2000-12-25",
-    #             address="404 Đường Hoàng Văn Thụ, Hà Nội",
-    #             phone="0981234567",
-    #             email="vang@gmail.com",
-    #             class_id=2
-    #         ),
-    #         Students(
-    #             name="Lê Thị H",
-    #             gender=GenderEnum.FEMALE,
-    #             birth_date="2001-08-18",
-    #             address="505 Đường Trần Hưng Đạo, Đà Nẵng",
-    #             phone="0956789012",
-    #             email="thih@gmail.com",
-    #             class_id=2
-    #         ),
-    #         Students(
-    #             name="Phạm Văn I",
-    #             gender=GenderEnum.MALE,
-    #             birth_date="2002-06-10",
-    #             address="606 Đường Phạm Ngũ Lão, Cần Thơ",
-    #             phone="0935678902",
-    #             email="vani@gmail.com",
-    #             class_id=1
-    #         ),
-    #         Students(
-    #             name="Hoàng Thị K",
-    #             gender=GenderEnum.FEMALE,
-    #             birth_date="2000-04-05",
-    #             address="707 Đường Lê Lợi, TP.HCM",
-    #             phone="0912345679",
-    #             email="thik@gmail.com",
-    #             class_id=2
-    #         )
-    #     ]
-    #     db.session.add_all(students)
-    #     db.session.commit()
 class Course(db.Model):
-    id = db.Column(db.String(10), primary_key=True)  # Khóa chính, kiểu String với độ dài tối đa 10
+    id = db.Column(db.String(10), primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 if __name__ == '__main__':
     with app.app_context():

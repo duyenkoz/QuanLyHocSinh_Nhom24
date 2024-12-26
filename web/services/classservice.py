@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from sqlalchemy import func
+from sqlalchemy.orm import aliased
 
 from web import db, app
 from web.models import Classes, Students
@@ -18,9 +19,20 @@ def countStudentsInClass(classId):
 def getAllClasses():
     return Classes.query.all()
 
+def countClassNoStudent():
+    number = (Classes.query
+        .outerjoin(Students, Students.class_id == Classes.id)
+        .group_by(Classes.id)
+        .having(func.count(Students.id) == 0)
+        .count())
+    return number
+
 # Function: Get list class with pagination
-def getClasses(pageIndex=1):
+def getClasses(pageIndex=1, selectedgrade = None):
     query = Classes.query
+
+    if selectedgrade:
+        query = query.filter(Classes.grade == int(selectedgrade))  # Lọc theo grade
 
     # Lấy tổng số bản ghi (trước khi phân trang)
     totalRecords = query.count()
@@ -109,3 +121,33 @@ def getClassById(class_id):
     classInfo = Classes.query.filter_by(id=class_id).first()
     classInfo.numberStudent = countStudentsInClass(class_id)
     return classInfo
+
+#: Function remove student in class
+def removeStudentById(class_id, student_id):
+    try:
+        student = Students.query.filter(Students.id==student_id,Students.class_id==class_id).first()
+        student.class_id = None
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return False
+
+#: Function add student into class
+def addStudentToClass(class_id, student_id):
+    try:
+        student = Students.query.get(student_id)
+        student.class_id = class_id
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return False
+
+#Function statistic
+def statisticClass():
+    data = (db.session.query(Classes.name, db.func.count(Students.id))
+        .outerjoin(Students, Classes.id == Students.class_id)
+        .group_by(Classes.id, Classes.name)
+        .all())
+    return data

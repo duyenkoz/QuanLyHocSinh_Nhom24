@@ -9,6 +9,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/qlhs?
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['PAGE_SIZE'] = 5
 app.config['MAX_STUDENT'] = 40
+app.config['AUTO_ASSIGN_CLASS'] = False
 app.secret_key = 'QuanLyHocSinhNhom24'
 
 login = LoginManager(app)

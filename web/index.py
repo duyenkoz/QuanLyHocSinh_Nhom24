@@ -1,12 +1,11 @@
 import math
-from re import search
-
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import current_user, login_user, logout_user
+from sqlalchemy import func
 from web import app, db
 import services.authservice
 from web.extentions.pagination import calcPagination
-from web.models import Students, GenderEnum, Classes, Course
+from web.models import Students, GenderEnum, Classes, Course, UserRole
 from web.services import studentservice, classservice
 
 
@@ -15,11 +14,29 @@ def required_login():
     if not current_user.is_authenticated and request.endpoint != 'login':
         return redirect(url_for('login'))
 
+@app.context_processor
+def inject_user_role():
+    return dict(UserRole=UserRole)
 
 @app.route('/')
 # @login_required
 def index():
-    return render_template('index.html')
+    total_students = studentservice.countStudents()
+    total_classes = classservice.countClasses()
+    students_without_class = studentservice.countStudentNotInClass()
+    classes_without_students = classservice.countClassNoStudent()
+
+    statistic = classservice.statisticClass()
+    chart_data = [(row[0], row[1]) for row in statistic]
+
+    return render_template(
+        'index.html',
+        total_students=total_students,
+        total_classes=total_classes,
+        students_without_class=students_without_class,
+        classes_without_students=classes_without_students,
+        chart_data=chart_data,
+    )
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -63,8 +80,8 @@ def manage_student():
         totalPage=totalPage,
         currentPage=pageIndex,
         pagination=pagination,
-        search=search,  # Gửi từ khóa tìm kiếm hiện tại để hiển thị
-        totalRecords=totalRecords  # Tổng số kết quả để xử lý hiển thị thông báo
+        search=search,
+        totalRecords=totalRecords
     )
 
 @app.route('/manage-student/create', methods=['GET', 'POST'])
@@ -77,7 +94,8 @@ def manage_student_create():
         phone = request.form.get('phone')
         email = request.form.get('email')
         address = request.form.get('address')
-        class_id = request.form.get('class_id')
+        class_id = request.form.get('classId')
+
         # Tạo đối tượng Student mới
         new_student = Students(
             name=name,
@@ -87,9 +105,14 @@ def manage_student_create():
             email=email,
             address=address,
         )
-        if class_id is None:
-            new_student.class_id = classservice.autoAssign(new_student)
-        new_student.class_id = class_id
+        if class_id is None or class_id == '':
+            if app.config['AUTO_ASSIGN_CLASS']:
+                new_student.class_id = classservice.autoAssign(new_student)
+            else:
+                new_student.class_id = None
+        else:
+            new_student.class_id = class_id
+
         result = studentservice.createStudent(new_student)
 
         if result:
@@ -112,7 +135,7 @@ def manage_student_edit():
         phone = request.form.get('phone')
         email = request.form.get('email')
         address = request.form.get('address')
-
+        class_id = request.form.get('classId')
         edit_student = Students(
             name=name,
             gender=gender,
@@ -121,6 +144,15 @@ def manage_student_edit():
             email=email,
             address=address
         )
+
+        if class_id is None or class_id == '':
+            if app.config['AUTO_ASSIGN_CLASS']:
+                edit_student.class_id = classservice.autoAssign(edit_student)
+            else:
+                edit_student.class_id = None
+        else:
+            edit_student.class_id = class_id
+
         result = studentservice.editStudent(id, edit_student)
 
         if result:
@@ -144,10 +176,12 @@ def manage_student_delete():
 
 @app.route('/manage-class')
 def manage_class():
+    selectedgrade = request.args.get('grade')
+
     pageIndex = request.args.get('pageIndex', 1, type=int)
 
     # Lấy danh sách học sinh và tổng số bản ghi từ service
-    classes, totalRecords = classservice.getClasses(pageIndex)
+    classes, totalRecords = classservice.getClasses(pageIndex, selectedgrade)
 
     # Tính tổng số trang
     totalPage = math.ceil(totalRecords / app.config['PAGE_SIZE'])
@@ -161,7 +195,8 @@ def manage_class():
         totalPage=totalPage,
         currentPage=pageIndex,
         pagination=pagination,
-        totalRecords=totalRecords  # Tổng số kết quả để xử lý hiển thị thông báo
+        totalRecords=totalRecords,
+        selectedgrade=selectedgrade# Tổng số kết quả để xử lý hiển thị thông báo
     )
 
 @app.route('/manage-class/create', methods=['GET', 'POST'])
@@ -182,7 +217,7 @@ def manage_class_create():
         if result:
             return redirect(url_for('manage_class', message='Thêm thành công', statuscode=1))
         else:
-            return redirect(url_for('manage_class', message='Thêm không thành công', statuscode=2))
+            return redirect(url_for('manage_class', message='Thêm không thành công, vui lòng kểm tra lại tên lớp', statuscode=2))
 
     return render_template('ManageClass/create.html')
 
@@ -271,5 +306,64 @@ def delete_course(course_id):
     else:
         flash('Không tìm thấy môn học để xóa!', 'danger')
     return redirect(url_for('manage_courses'))
+
+@app.route('/manage-class/students/delete')
+def manage_class_students_delete():
+    classId = request.args.get('classId')
+    studentId = request.args.get('studentId')
+
+    result = classservice.removeStudentById(classId, studentId)
+    if result:
+        return redirect(url_for('manage_class_students', classId=classId, message='Xóa thành công', statuscode=1))
+    else:
+        return redirect(url_for('manage_class_students', classId=classId, message='Xóa không thành công', statuscode=2))
+
+
+@app.route('/manage-class/students/list')
+def manage_class_students_list_noclass():
+    classId = request.args.get('classId')
+    pageIndex = request.args.get('pageIndex', 1, type=int)
+    classInfo = classservice.getClassById(classId)
+
+    students, totalRecords = studentservice.getStudentsNotInClass()
+
+    # Tính tổng số trang
+    totalPage = math.ceil(totalRecords / app.config['PAGE_SIZE'])
+
+    # Tạo pagination
+    pagination = calcPagination(pageIndex, totalPage)
+
+    return render_template(
+        'ManageClass/addStudent.html',
+        classInfo=classInfo,
+        students=students,
+        totalPage=totalPage,
+        currentPage=pageIndex,
+        pagination=pagination,
+        pageSize=app.config['PAGE_SIZE'],
+        totalRecords=totalRecords
+    )
+
+@app.route('/manage-class/students/add')
+def manage_class_students_add():
+    classId = request.args.get('classId')
+    studentId = request.args.get('studentId')
+
+    result = classservice.addStudentToClass(classId, studentId)
+    if result:
+        return redirect(url_for('manage_class_students_list_noclass', classId=classId, message='Thêm thành công', statuscode=1))
+    else:
+        return redirect(url_for('manage_class_students_list_noclass', classId=classId, message='Thêm không thành công', statuscode=2))
+
+@app.route('/api/checkExistMail')
+def check_exist_mail():
+    email = request.args.get('email')
+    return studentservice.checkUniqueEmail(email)
+
+@app.route('/api/checkExistPhone')
+def check_exist_phone():
+    phone = request.args.get('phone')
+    return studentservice.checkUniquePhone(phone)
+
 if __name__ == '__main__':
     app.run(debug=True)
