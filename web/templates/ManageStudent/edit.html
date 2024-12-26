@@ -16,7 +16,7 @@
                 <form class="row g-3 needs-validation" method="POST" novalidate>
                     <input name="id" value="{{student.id}}" hidden=""/>
                     <div class="col-md-6">
-                        <label for="inputName" class="form-label">Họ và tên</label>
+                        <label for="inputName" class="form-label">Họ và tên<span class="text-danger"> *</span></label>
                         <input name="name" type="text" class="form-control" id="inputName"
                                value="{{student.name}}" required>
                         <div class="valid-feedback">
@@ -25,7 +25,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Giới tính</label>
+                        <label class="form-label">Giới tính<span class="text-danger"> *</span></label>
                         <select name="gender" class="form-select" id="floatingSelect"
                                 aria-label="Floating label select example">
                             <option>Chọn giới tính</option>
@@ -36,7 +36,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="inputDOB" class="form-label">Ngày sinh</label>
+                        <label for="inputDOB" class="form-label">Ngày sinh<span class="text-danger"> *</span></label>
                         <input name="birth_date" type="date" class="form-control" id="inputDOB"
                                value="{{student.birth_date}}" required>
                         <div class="invalid-feedback">
@@ -56,23 +56,24 @@
                         <label for="inputEmail" class="form-label">Email</label>
                         <input name="email" type="email" class="form-control" id="inputEmail" value="{{student.email}}">
                     </div>
-
-                    <div class="col-md-6">
-                        <label for="inputAddress" class="form-label">Địa chỉ</label>
-                        <input name="address" type="text" class="form-control" id="inputAddress"
-                               value="{{student.address}}" required>
-                        <div class="invalid-feedback">
-                        </div>
-                    </div>
                     <div class="col-md-6">
                         <label class="form-label">Lớp</label>
                         <select name="classId" class="form-select" id="classSelect"
                                 aria-label="Floating label select example">
                             <option value="" selected>Chọn lớp</option>
                             {% for class in classes %}
-                            <option value="{{class.id}}" {% if student.class_id == class.id %}selected{% endif %}>{{class.name}}</option>
+                            <option value="{{class.id}}" {% if student.class_id== class.id %}selected{% endif %}>
+                                {{class.name}}
+                            </option>
                             {% endfor %}
                         </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="inputAddress" class="form-label">Địa chỉ<span class="text-danger"> *</span></label>
+                        <input name="address" type="text" class="form-control" id="inputAddress"
+                               value="{{student.address}}" required>
+                        <div class="invalid-feedback">
+                        </div>
                     </div>
                     <!-- Thêm nút gửi form -->
                     <div class="col-12">

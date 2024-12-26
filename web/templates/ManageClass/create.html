@@ -15,7 +15,7 @@
             <div class="form-container">
                 <form class="row g-3 needs-validation" method="POST" novalidate>
                     <div class="col-md-6">
-                        <label for="inputName" class="form-label">Tên lớp</label>
+                        <label for="inputName" class="form-label">Tên lớp<span class="text-danger"> *</span></label>
                         <input name="name" type="text" class="form-control" id="inputName" required>
                         <div class="valid-feedback">
                             Thêm tên lớp!
@@ -23,7 +23,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Khối</label>
+                        <label class="form-label">Khối<span class="text-danger"> *</span></label>
                         <select name="grade" class="form-select" id="floatingSelect" aria-label="Floating label select example" required>
                             <option value="" selected>Chọn khối</option>
                             <option value="10">Khối 10</option>

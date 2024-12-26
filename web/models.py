@@ -51,10 +51,10 @@ class Classes(db.Model):
 # Tạo bảng Students
 class Students(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(50), nullable=False)
-    gender = db.Column(Enum(GenderEnum), nullable=False)
-    birth_date = db.Column(db.Date, nullable=False)
-    address = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(50), nullable=True)
+    gender = db.Column(Enum(GenderEnum), nullable=True)
+    birth_date = db.Column(db.Date, nullable=True)
+    address = db.Column(db.String(255), nullable=True)
     phone = db.Column(db.String(15), nullable=False)
     email = db.Column(db.String(255), nullable=False)
     class_id  = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=True)

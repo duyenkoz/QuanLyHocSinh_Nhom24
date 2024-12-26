@@ -15,7 +15,7 @@
             <div class="form-container">
                 <form class="row g-3 needs-validation" method="POST" novalidate>
                     <div class="col-md-6">
-                        <label for="inputName" class="form-label">Họ và tên</label>
+                        <label for="inputName" class="form-label">Họ và tên<span class="text-danger"> *</span></label>
                         <input name="name" type="text" class="form-control" id="inputName" required>
                         <div class="invalid-feedback">
                             Nhập Họ và tên!
@@ -23,7 +23,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Giới tính</label>
+                        <label class="form-label">Giới tính<span class="text-danger"> *</span></label>
                         <select name="gender" class="form-select" id="floatingSelect"
                                 aria-label="Floating label select example" required>
                             <option value="" selected>Chọn giới tính</option>
@@ -36,10 +36,10 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="inputDOB" class="form-label">Ngày sinh</label>
+                        <label for="inputDOB" class="form-label">Ngày sinh<span class="text-danger"> *</span></label>
                         <input name="birth_date" type="date" class="form-control" id="inputDOB" required>
                         <div class="invalid-feedback">
-                            Chọn ngày sinh!
+                            Nhập ngày sinh hợp lệ (tuổi phải từ 15 đến 20).
                         </div>
                     </div>
 
@@ -70,7 +70,7 @@
                         </select>
                     </div>
                     <div class="col-md-12">
-                        <label for="inputAddress" class="form-label">Địa chỉ</label>
+                        <label for="inputAddress" class="form-label">Địa chỉ<span class="text-danger"> *</span></label>
                         <input name="address" type="text" class="form-control" id="inputAddress" required>
                         <div class="invalid-feedback">
                             Nhập địa chỉ
@@ -97,6 +97,28 @@
         Array.prototype.slice.call(forms)
             .forEach(function (form) {
                 form.addEventListener('submit', function (event) {
+                    var birthdayInput = form.querySelector('input[name="birth_date"]'); // Input ngày sinh
+                    var isValidBirthday = true;
+
+                    if (birthdayInput) {
+                        var birthDate = new Date(birthdayInput.value);
+                        var today = new Date();
+                        var age = today.getFullYear() - birthDate.getFullYear();
+                        var monthDiff = today.getMonth() - birthDate.getMonth();
+
+                        // Điều chỉnh nếu tháng hoặc ngày sinh chưa tới trong năm hiện tại
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+
+                        // Kiểm tra tuổi nằm trong khoảng 15 - 20
+                        if (age < 15 || age > 20) {
+                            isValidBirthday = false;
+                            birthdayInput.setCustomValidity("Tuổi phải nằm trong khoảng từ 15 đến 20!");
+                        } else {
+                            birthdayInput.setCustomValidity(""); // Xóa thông báo lỗi nếu hợp lệ
+                        }
+                    }
                     if (!form.checkValidity()) {
                         event.preventDefault()
                         event.stopPropagation()
